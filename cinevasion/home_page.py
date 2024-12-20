@@ -51,13 +51,20 @@ st.title("CINEVASION")
 # 📘 Section de recherche de films
 with st.container():
     film_input = st.text_input("Entrez le nom d'un film", placeholder="Rechercher un film...")  # Champ de recherche de film
-    if st.button("Recommander un film"):  # Bouton de recherche de film
+    if st.button("Rechercher un film"):  # Bouton de recherche de film
         if film_input:  # Vérifie si l'utilisateur a saisi un nom de film
-            st.session_state["search_film"] = film_input  # Stocke le film recherché dans l'état de session
-            st.switch_page("pages/recommendations_page.py")  # Redirige vers la page des recommandations
+            # Recherche du film correspondant dans le DataFrame
+            selected_film = films[films['title'].str.contains(film_input, case=False, na=False)]
+            
+            if not selected_film.empty:  # Si un ou plusieurs films correspondent
+                selected_film_row = selected_film.iloc[0]  # Prend le premier film correspondant
+                st.session_state['selected_film_tconst'] = selected_film_row['tconst']  # Stocke le code du film dans la session
+                st.session_state['go_to_details'] = True  # Active la navigation vers la page de détails
+                st.switch_page("pages/details_page.py")  # Redirige vers la page de détails du film
+            else:
+                st.warning("Aucun film ne correspond à votre recherche.")  # Message si aucun film n'est trouvé
         else:
             st.warning("Veuillez entrer le nom d'un film.")  # Message d'erreur si l'utilisateur n'a pas saisi de film
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # 📘 Filtres de recherche pour les films
 st.subheader("Filtres")  # Sous-titre de la section des filtres
