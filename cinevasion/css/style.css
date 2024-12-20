@@ -1,0 +1,116 @@
+.stApp {
+    /* Arrière-plan avec une image et un dégradé transparent */
+    background: linear-gradient(180deg, 
+        rgba(29, 25, 43, 0.5), /* Couleur sombre semi-transparente */
+        rgba(85, 77, 112, 0.5)), /* Couleur plus claire semi-transparente */
+        url('css/background_image.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white; /* Couleur par défaut du texte */
+}
+
+.neo-container {
+    /* Conteneur avec un effet de flou et ombrage pour un style moderne */
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2),
+                -5px -5px 15px rgba(255, 255, 255, 0.05);
+    margin-bottom: 20px;
+}
+
+body {
+    /* Couleur du texte par défaut */
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Styles pour les champs de saisie */
+.stTextInput > div > div > input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+    padding: 15px;
+}
+
+/* Styles pour les boutons */
+.stButton > button {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05));
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 10px 20px;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    /* Effet au survol des boutons */
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.1));
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Styles pour les cartes de films */
+.movie-card {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.02));
+    border-radius: 15px;
+    padding: 10px;
+    margin: 10px 0;
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+    /* Effet au survol des cartes de films */
+    transform: translateY(-5px);
+}
+
+/* Styles pour les titres */
+h1, h2, h3 {
+    /* Couleur blanche et poids modéré pour les titres */
+    color: white;
+    font-weight: 500;
+}
+
+/* Styles pour les images */
+img {
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    /* Effet d'agrandissement au survol des images */
+    transform: scale(1.02);
+}
+
+/* Styles pour les menus déroulants (select) */
+.stSelectbox > div > div {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+}
+
+.stMultiSelect > div > div {
+    /* Styles pour les menus multi-sélection */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+}
+
+/* Conteneur pour les recommandations */
+.recommendations-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+}
