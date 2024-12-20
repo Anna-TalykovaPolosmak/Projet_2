@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-from utils.utils import load_css, load_files
+from utils.utils import load_css, load_files, prepare_features, get_recommendations
 
 # 📘 Configuration de la page Streamlit
 st.set_page_config(
@@ -124,7 +124,42 @@ try:
                     """, unsafe_allow_html=True)  # Affiche la photo et le nom de l'acteur
         st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown('<div class="neo-container">', unsafe_allow_html=True)
+    st.subheader("Films similaires")  # Titre de la section des réalisateurs
+    # 📘 Préparation des caractéristiques des films
+    features_matrix = prepare_features(films)
+
+    film_choice = selected_film['title']
+
+    try:
+        # 📘 Obtenir les recommandations de films
+        recommended_films = get_recommendations(
+            film_choice, 
+            films, 
+            features_matrix,
+            n_recommendations=5
+        )
+
+        cols = st.columns(5)
+    
+        for i, (_, film) in enumerate(recommended_films.iterrows()):
+            with cols[i]:
+                with st.container():
+                    st.image(film['poster_path'], use_container_width=True)             
+                    if st.button("Détails", key=f"details_{i}_{film['tconst']}"):
+                        st.session_state.button_state = "action"
+                        st.session_state['selected_film_tconst'] = film['tconst']
+                        st.switch_page("pages/details_page.py")
+
+    except Exception as exc:
+        st.error(f"Erreur lors de la génération des recommandations : {str(exc)}")
+
+
+
 except Exception as e:
     # 📘 Gestion des erreurs
     st.error(f"Erreur lors de l'affichage des détails du film : {str(e)}")  # Affiche l'erreur
     st.switch_page("home_page.py")  # Redirige vers la page d'accueil
+
+
+
