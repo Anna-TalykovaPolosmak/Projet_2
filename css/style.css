@@ -1,0 +1,250 @@
+.stApp {
+    /* Arrière-plan avec une image et un dégradé transparent */
+    background: linear-gradient(180deg, 
+        rgba(29, 25, 43, 0.5), /* Couleur sombre semi-transparente */
+        rgba(85, 77, 112, 0.5)), /* Couleur plus claire semi-transparente */
+        url('css/background_image.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white; /* Couleur par défaut du texte */
+}
+
+.neo-container {
+    /* Conteneur avec un effet de flou et ombrage pour un style moderne */
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2),
+                -5px -5px 15px rgba(255, 255, 255, 0.05);
+    margin-bottom: 20px;
+}
+
+body {
+    /* Couleur du texte par défaut */
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Styles pour les champs de saisie */
+.stTextInput > div > div > input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+    padding: 15px;
+}
+
+/* Styles pour les boutons */
+.stButton > button {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05));
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 10px 20px;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    /* Effet au survol des boutons */
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.1));
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Styles pour les cartes de films */
+.movie-card {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.02));
+    border-radius: 15px;
+    padding: 10px;
+    margin: 10px 0;
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+    /* Effet au survol des cartes de films */
+    transform: translateY(-5px);
+}
+
+/* Styles pour les titres */
+h1, h2, h3 {
+    /* Couleur blanche et poids modéré pour les titres */
+    color: white;
+    font-weight: 600;
+}
+
+/* Styles pour les images */
+img {
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    /* Effet d'agrandissement au survol des images */
+    transform: scale(1.02);
+}
+
+/* Styles pour les menus déroulants (select) */
+.stSelectbox > div > div {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+}
+
+.stMultiSelect > div > div {
+    /* Styles pour les menus multi-sélection */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+}
+
+/* Conteneur pour les recommandations */
+.recommendations-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+}
+
+/* Conteneur pour les titres principaux avec effet néon */
+.title-container {
+    text-align: center; /* Centre le texte */
+    padding: 2rem 0; /* Espacement vertical */
+}
+
+.neon-title {
+    font-family: 'Arial', sans-serif; /* Police standard */
+    font-size: 3rem; /* Taille du texte */
+    font-weight: bold; /* Texte en gras */
+    color: #ff69b4; /* Couleur néon */
+    text-align: center; /* Centre le texte */
+    text-shadow: 
+        0 0 5px #ff69b4,
+        0 0 10px #ff69b4,
+        0 0 20px #ff69b4,
+        0 0 40px #ff1493,
+        0 0 80px #ff1493; /* Effet de lumière autour du texte */
+    animation: flicker 1.5s infinite alternate; /* Animation scintillante */
+}
+
+/* Animation pour l'effet scintillant */
+@keyframes flicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        text-shadow: 
+            0 0 5px #ff69b4,
+            0 0 10px #ff69b4,
+            0 0 20px #ff69b4,
+            0 0 40px #ff1493,
+            0 0 80px #ff1493;
+    }
+    20%, 24%, 55% {
+        text-shadow: none; /* Supprime l'effet pendant l'animation */
+    }
+}
+
+/* Ajout de styles pour les informations sur les films */
+.movie-info {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.07),
+        rgba(255, 255, 255, 0.03));
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.movie-info p {
+    color: white;
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.movie-info strong {
+    color: #ff69b4;
+}
+
+.movie-synopsis {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.02));
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+/* Styles pour les cartes d'acteurs et de réalisateurs */
+.person-card {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.07),
+        rgba(255, 255, 255, 0.03));
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    margin: 10px;
+    transition: transform 0.3s ease;
+}
+
+.person-card:hover {
+    transform: translateY(-5px);
+}
+
+.person-card img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.person-card h4 {
+    color: #ff69b4;
+    margin: 5px 0;
+    font-size: 1.1em;
+    text-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+}
+
+.directors-section, .actors-section {
+    margin-top: 30px;
+    padding: 20px;
+}
+
+/* Styles pour le centrage de la recherche */
+.search-container {
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+    text-align: center;
+}
+
+.search-container p {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.search-container button {
+    margin: 15px auto 0 auto;
+    display: block !important;
+    max-width: 200px;
+}
+
+/* Styles supplémentaires pour les éléments de recherche */
+.search-label {
+    color: #ff69b4;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 105, 180, 0.5);
+}
+
+/* Styles pour l'indicateur de chargement */
+.stSpinner > div {
+    border-color: #ff69b4 transparent transparent transparent !important;
+}
