@@ -57,20 +57,47 @@ class MovieChatbot:
 
     def __init__(self):
         try:
+            # Initialisation explicite de vectorstore à None
+            self.vectorstore = None
+            
             # Initialisation de l'état de session en premier
             self.initialize_session_state()
             
-            # Initialisation d'OpenAI et des embeddings
-            self.client = OpenAI(api_key=st.secrets["OpenAI_key"])
-            self.embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["OpenAI_key"])
+            # Initialisation d'OpenAI
+            try:
+                self.client = OpenAI(api_key=st.secrets["OpenAI_key"])
+                st.session_state["openai_initialized"] = True
+            except Exception as e:
+                st.error(f"Erreur d'initialisation d'OpenAI: {str(e)}")
+                st.session_state["openai_initialized"] = False
+                return
+                
+            # Initialisation des embeddings
+            try:
+                self.embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["OpenAI_key"])
+                st.session_state["embeddings_initialized"] = True
+            except Exception as e:
+                st.error(f"Erreur d'initialisation des embeddings: {str(e)}")
+                st.session_state["embeddings_initialized"] = False
+                return
             
             # Chargement des données principales
-            self.films = pd.read_csv("csv/films_def.csv")
-            self.intervenants = pd.read_csv("csv/intervenants_def.csv")
-            self.lien = pd.read_csv("csv/lien_def.csv")
+            try:
+                self.films = pd.read_csv("csv/films_def.csv")
+                self.intervenants = pd.read_csv("csv/intervenants_def.csv")
+                self.lien = pd.read_csv("csv/lien_def.csv")
+                st.session_state["data_loaded"] = True
+            except Exception as e:
+                st.error(f"Erreur de chargement des données: {str(e)}")
+                st.session_state["data_loaded"] = False
+                return
             
             # Création ou chargement du vectorstore
-            self.vectorstore = self._create_or_load_vectorstore()
+            if st.session_state.get("embeddings_initialized", False) and st.session_state.get("data_loaded", False):
+                self.vectorstore = self._create_or_load_vectorstore()
+                
+            if self.vectorstore is None:
+                st.warning("Le vectorstore n'a pas pu être initialisé. Le chatbot fonctionnera avec des capacités limitées.")
                 
         except Exception as e:
             st.error(f"Erreur d'initialisation du chatbot: {str(e)}")
@@ -89,12 +116,25 @@ class MovieChatbot:
                 embedding_function=self.embeddings
             )
             # Vérification du bon fonctionnement
-            vectorstore.similarity_search("test", k=1)
-            return vectorstore
+            try:
+                vectorstore.similarity_search("test", k=1)
+                return vectorstore
+            except Exception as search_error:
+                st.warning(f"Impossible d'utiliser le vectorstore existant: {str(search_error)}")
+                # On va essayer de créer un nouveau vectorstore
+                
+        except Exception as e:
+            st.warning(f"Erreur lors du chargement du vectorstore: {str(e)}")
             
-        except Exception:
-            # Création d'une nouvelle base si le chargement a échoué
+        # Si nous arrivons ici, c'est que nous n'avons pas pu charger le vectorstore
+        try:
+            # Création d'une nouvelle base
+            st.info("Tentative de création d'un nouveau vectorstore...")
             documents = self._prepare_movie_documents()
+            if not documents:
+                st.error("Aucun document disponible pour créer le vectorstore")
+                return None
+                
             vectorstore = Chroma.from_texts(
                 texts=[doc["content"] for doc in documents],
                 metadatas=[doc["metadata"] for doc in documents],
@@ -103,6 +143,9 @@ class MovieChatbot:
             )
             vectorstore.persist()
             return vectorstore
+        except Exception as e2:
+            st.error(f"Erreur lors de la création du vectorstore: {str(e2)}")
+            return None
     
     def _prepare_movie_documents(self):
         documents = []
@@ -132,7 +175,7 @@ class MovieChatbot:
                 actors = self.intervenants[
                     self.intervenants['nconst'].isin(movie_actors['nconst'])
                 ]
-                content += f"🎬 Acteurs: {', '.join(actors['primaryName'])}\n"
+                content += f"🎬 Acteurs: {', '.join(actors['primaryName']) if not actors.empty else 'Non disponible'}\n"
                 
                 # Ajout du lien vers la bande-annonce, s'il existe
                 if pd.notna(movie['trailer_link']):
@@ -165,6 +208,13 @@ class MovieChatbot:
 
     def get_response(self, user_input: str) -> str:
         try:
+            # Vérification de l'initialisation
+            if not hasattr(self, 'vectorstore') or self.vectorstore is None:
+                return "Je suis désolé, ma base de connaissances n'est pas disponible actuellement. Je peux toutefois vous aider avec des questions générales sur le cinéma! 🎬"
+            
+            if not hasattr(self, 'embeddings') or self.embeddings is None:
+                return "Je suis désolé, je rencontre des difficultés techniques. Veuillez réessayer plus tard. 🎬"
+            
             # Obtention de l'embedding pour l'entrée utilisateur
             embedding_response = self.embeddings.embed_documents([user_input])[0]
             
@@ -216,9 +266,9 @@ class MovieChatbot:
             return response.choices[0].message.content
 
         except Exception as e:
-            error_message = f"Désolé, une erreur s'est produite: {str(e)}"
+            error_message = f"Je suis désolé, une erreur s'est produite: {str(e)}"
             st.error(error_message)
-            return "Je suis désolé, je ne peux pas répondre pour le moment. 😔"
+            return "Je suis désolé, je ne peux pas répondre à cette question pour le moment. Essayez avec une autre question sur les films! 🎬"
 
     def display(self):
         try:
@@ -236,15 +286,31 @@ class MovieChatbot:
                         st.markdown(prompt)
 
                     with st.chat_message("assistant"):
-                        response = self.get_response(prompt)
+                        # Vérification de l'état d'initialisation
+                        if not st.session_state.get("openai_initialized", False):
+                            response = "Je suis désolé, je ne peux pas me connecter à mon service de réponses actuellement. Veuillez réessayer plus tard. 🎬"
+                        else:
+                            response = self.get_response(prompt)
+                        
                         st.markdown(response, unsafe_allow_html=True)
                         st.session_state.messages.append({"role": "assistant", "content": response})
                         
         except Exception as e:
             st.error(f"Erreur d'affichage du chat: {str(e)}")
 
+# Fonction pour créer et afficher le chatbot
+def create_chatbot():
+    try:
+        return MovieChatbot()
+    except Exception as e:
+        st.error(f"Erreur lors de la création du chatbot: {str(e)}")
+        return None
+
 # Création d'une instance du chatbot et lancement de l'application
 if __name__ == "__main__":
     st.title("🎬 CineBot - Votre Assistant Cinéma")
-    bot = MovieChatbot()
-    bot.display()
+    bot = create_chatbot()
+    if bot:
+        bot.display()
+    else:
+        st.warning("Le chatbot n'a pas pu être initialisé correctement.")

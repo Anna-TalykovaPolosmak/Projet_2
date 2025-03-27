@@ -8,7 +8,7 @@ st.set_page_config(
 
 import pandas as pd
 from utils.utils import load_css, search_movies, check_authentication, handle_signup, handle_login, handle_logout
-from chatbot.chatbot import MovieChatbot
+from chatbot.chatbot import create_chatbot
 
 
 # Chargement du fichier CSS pour le style de l'application
@@ -288,5 +288,8 @@ if st.session_state.get('go_to_details', False):
     st.switch_page("pages/details_page.py")
 
 # Initialisation et affichage du chatbot
-chat = MovieChatbot()
-chat.display()
+chat = create_chatbot()
+if chat:
+    chat.display()
+else:
+    st.warning("Le chatbot n'a pas pu être initialisé correctement. Vous pouvez quand même explorer les films!")
