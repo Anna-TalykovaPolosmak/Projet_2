@@ -76,11 +76,11 @@ cinevasion/
 ## 🎨 Screenshots
 
 ![Home Page]![image](https://github.com/user-attachments/assets/f4d4e1b0-fbd1-43dc-aaa6-792ce546d485)
-![Movie Details](![image](https://github.com/user-attachments/assets/7e9631e7-dfd8-49b9-9bb1-bbb4696c0e39))
+![Movie Details]([image](https://github.com/user-attachments/assets/7e9631e7-dfd8-49b9-9bb1-bbb4696c0e39))
 ![image](https://github.com/user-attachments/assets/fb55097e-9825-499a-b3d1-a7df1f9aa519)
 ![image](https://github.com/user-attachments/assets/867b961a-1b02-421c-9ef9-76fcb5f9311f)
 
-![CineBot](![image](https://github.com/user-attachments/assets/631dd02d-2721-4ca2-9bd9-a3d196c5ca29))
+![CineBot]([image](https://github.com/user-attachments/assets/631dd02d-2721-4ca2-9bd9-a3d196c5ca29))
 
 ## 📈 Future Enhancements
 
