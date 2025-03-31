@@ -6,7 +6,7 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings  
 import os
 
-# Activation du support HTML et CSS pour le style
+# Activation du support HTML et CSS pour style
 st.markdown("""
     <style>
     .stChatMessage {
