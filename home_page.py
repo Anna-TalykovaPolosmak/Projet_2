@@ -55,25 +55,6 @@ unique_genres = get_unique_genres(films)
 decades = get_decades(films)
 decade_options = [f"{decade}s" for decade in decades]
 
-# Barre latérale pour l'authentification
-with st.sidebar:
-    st.title("Utilisateur")
-    if check_authentication():
-        st.write(f"Connecté : {st.session_state['user']['email']}")
-        if st.button("Se déconnecter"):
-            handle_logout()
-    else:
-        st.write("Non connecté")
-        auth_mode = st.radio("Action :", ["Se connecter", "S'inscrire"])
-        email = st.text_input("Email", placeholder="email@example.com")
-        password = st.text_input("Mot de passe", type="password", placeholder="Mot de passe")
-
-        if auth_mode == "S'inscrire":
-            if st.button("S'inscrire"):
-                handle_signup(email, password)
-        elif auth_mode == "Se connecter":
-            if st.button("Se connecter"):
-                handle_login(email, password)
 
 # Titre de l'application
 st.markdown(
