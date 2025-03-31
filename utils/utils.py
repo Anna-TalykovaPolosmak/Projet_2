@@ -122,85 +122,43 @@ def format_movie_info(movie):
         st.error(f"Erreur dans format_movie_info: {e}")
         return "Information non disponible"
 
-@st.cache_data(ttl=600)  # Mise en cache des résultats de recherche pendant 10 minutes
 def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5):
-    """
-    Fonction optimisée de recherche de films par mot-clé ou nom d'acteur.
-    
-    Args:
-        query (str): Requête de recherche
-        films_df (pd.DataFrame): DataFrame avec les films
-        intervenants_df (pd.DataFrame): DataFrame avec les acteurs et réalisateurs
-        lien_df (pd.DataFrame): DataFrame reliant les films et les personnes
-        n_recommendations (int): Nombre de résultats à retourner
-    
-    Returns:
-        pd.DataFrame: Films trouvés
-    """
     try:
-        # Vérification préliminaire d'une requête vide
-        if not query or query.strip() == "":
-            return films_df.head(n_recommendations)
-
-        query = query.lower()  # Conversion de la requête en minuscules une seule fois
-        
-        # Recherche rapide par acteurs - utilise l'indexation pour la vitesse
-        actor_matches = intervenants_df[intervenants_df['primaryName'].str.lower().str.contains(query, na=False)]
-        
+        # Поиск по актёрам
+        actor_matches = intervenants_df[intervenants_df['primaryName'].str.contains(query, case=False, na=False)]
         if not actor_matches.empty:
-            # Prenons seulement le premier acteur trouvé
             actor_nconst = actor_matches.iloc[0]['nconst']
-            
-            # Récupération des films avec cet acteur
             actor_movies = lien_df[lien_df['nconst'] == actor_nconst]
-            matched_films = films_df[films_df['tconst'].isin(actor_movies['tconst'])]
-            
-            if not matched_films.empty:
-                return matched_films.head(n_recommendations)
+            return films_df[films_df['tconst'].isin(actor_movies['tconst'])].head(n_recommendations)
         
-        # Création optimisée du masque pour la recherche
-        # Recherche d'abord uniquement dans les champs les plus importants pour accélérer
-        essential_mask = (
-            films_df['title'].str.lower().str.contains(query, na=False) |
-            films_df['genres'].str.lower().str.contains(query, na=False)
+        # Поиск по всем критериям
+        mask = (
+            films_df['title'].str.contains(query, case=False, na=False) |
+            films_df['overview'].str.contains(query, case=False, na=False) |
+            films_df['genres'].str.contains(query, case=False, na=False) |
+            films_df['keywords'].str.contains(query, case=False, na=False) |
+            films_df['tagline'].str.contains(query, case=False, na=False) |
+            films_df['origin_country'].str.contains(query, case=False, na=False)
         )
         
-        essential_matches = films_df[essential_mask]
-        
-        if not essential_matches.empty:
-            return essential_matches.head(n_recommendations)
-        
-        # Recherche étendue seulement si nécessaire
-        extended_mask = (
-            films_df['overview'].str.lower().str.contains(query, na=False) |
-            films_df['keywords'].str.lower().str.contains(query, na=False) |
-            films_df['tagline'].str.lower().str.contains(query, na=False) |
-            films_df['origin_country'].str.lower().str.contains(query, na=False)
-        )
-        
-        extended_matches = films_df[extended_mask]
-        
-        if not extended_matches.empty:
-            return extended_matches.head(n_recommendations)
+        direct_matches = films_df[mask]
+        if not direct_matches.empty:
+            return direct_matches.head(n_recommendations)
             
-        # TF-IDF utilisé uniquement en dernier recours, lorsque la recherche directe n'a donné aucun résultat
-        from sklearn.feature_extraction.text import TfidfVectorizer
-        from sklearn.metrics.pairwise import cosine_similarity
-        
-        # Création du texte de recherche uniquement pour un sous-ensemble de champs importants
-        # et avec une multiplication moindre pour overview
+        # Поиск по TF-IDF если прямых совпадений нет
         films_df['search_text'] = (
             films_df['title'].fillna('') + ' ' +
-            films_df['overview'].fillna('') + ' ' +
+            films_df['overview'].fillna('') * 3 + ' ' +
             films_df['keywords'].fillna('') + ' ' +
-            films_df['genres'].fillna('')
+            films_df['genres'].fillna('') + ' ' +
+            films_df['tagline'].fillna('') + ' ' +
+            films_df['origin_country'].fillna('')
         )
         
-        # Nombre réduit de max_features pour accélérer
         tfidf = TfidfVectorizer(
             stop_words='english',
-            max_features=2000,  # Réduit de 5000
-            ngram_range=(1, 1)  # Utilisation uniquement des unigrammes pour la vitesse
+            max_features=5000,
+            ngram_range=(1, 2)
         )
         
         tfidf_matrix = tfidf.fit_transform(films_df['search_text'])
@@ -212,5 +170,60 @@ def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5
         
     except Exception as e:
         st.error(f"Erreur dans search_movies: {str(e)}")
-        return films_df.head(n_recommendations)  # Retour des films populaires en cas d'erreur
+        return pd.DataFrame()
     
+from supabase import create_client, Client
+
+url = "https://ztihcbkzolqvmmiylcnn.supabase.co"
+key= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0aWhjYmt6b2xxdm1taXlsY25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5Njk1NjAsImV4cCI6MjA1MDU0NTU2MH0.z0lQr5IBN6-wMCJROEYLfQOHvn0WVPzsPZut4IWO-Sw"
+supabase: Client = create_client(url, key)
+
+
+def check_authentication():
+    """Vérifie si l'utilisateur est connecté."""
+    return "user" in st.session_state
+
+def handle_signup(email, password):
+    """Gestion de l'inscription."""
+    if not email or not password:
+        st.error("Veuillez remplir tous les champs pour vous inscrire.")
+        return
+    try:
+        response = supabase.auth.sign_up({"email": email, "password": password})
+        if response.user:
+            user_data = {"id": response.user.id, "email": email}
+            try:
+                supabase.table("users").insert(user_data).execute()
+                st.success("Inscription réussie ! Vous pouvez maintenant vous connecter.")
+            except Exception as e:
+                st.error(f"Erreur lors de l'ajout à la base de données : {str(e)}")
+        else:
+            st.error("Erreur lors de l'inscription. Veuillez réessayer.")
+    except Exception as e:
+        st.error(f"Une erreur inattendue est survenue : {str(e)}")
+
+def handle_login(email, password):
+    """Gestion de la connexion."""
+    if not email or not password:
+        st.error("Veuillez remplir tous les champs pour vous connecter.")
+        return
+    try:
+        response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        if response.user:
+            st.session_state["user"] = {"id": response.user.id, "email": response.user.email}
+            st.success(f"Bienvenue {response.user.email} !")
+        else:
+            st.error("Erreur lors de la connexion. Vérifiez vos identifiants.")
+    except Exception as e:
+        st.error(f"Une erreur inattendue est survenue : {str(e)}")
+
+def handle_logout():
+    """Déconnexion de l'utilisateur."""
+    if "user" in st.session_state:
+        del st.session_state["user"]
+    st.rerun()
+
+# Следующие функции были удалены:
+# - add_movie_to_list
+# - remove_movie_from_list
+# - get_user_movies
