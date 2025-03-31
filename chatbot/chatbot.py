@@ -1,8 +1,9 @@
+
 import streamlit as st
 from openai import OpenAI
 import pandas as pd
-from langchain_community.vectorstores import Chroma  # le changement ici
-from langchain_openai import OpenAIEmbeddings  # le changement ici
+from langchain.vectorstores import Chroma  
+from langchain.embeddings.openai import OpenAIEmbeddings  
 import os
 
 # Activation du support HTML et CSS pour le style
