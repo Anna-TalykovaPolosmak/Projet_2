@@ -1,10 +1,12 @@
-﻿streamlit==1.40.1
+streamlit==1.40.1
 pandas==2.2.3
 numpy==1.26.4
 scikit-learn==1.5.2
 openai==1.58.1
 langchain-core==0.3.28
 langchain-openai==0.2.14
-chromadb==0.4.18git status
-langchain-community==0.0.16
+langchain-community==0.2.15
+chromadb==0.5.23
+python-dotenv==1.0.1
+rich==13.7.0
 
