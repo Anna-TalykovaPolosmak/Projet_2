@@ -6,7 +6,7 @@ st.set_page_config(
     layout="wide"
 )
 import pandas as pd
-from utils.utils import load_css, get_recommendations, prepare_features, check_authentication, handle_logout, handle_signup, handle_login
+from utils.utils import load_css, get_recommendations, prepare_features
 from chatbot.chatbot import MovieChatbot
 
 # Chargement du fichier CSS pour le style de l'application

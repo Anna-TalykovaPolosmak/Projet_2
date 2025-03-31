@@ -7,7 +7,7 @@ st.set_page_config(
 )
 
 import pandas as pd
-from utils.utils import load_css, search_movies, check_authentication, handle_signup, handle_login, handle_logout
+from utils.utils import load_css, search_movies
 from chatbot.chatbot import create_chatbot
 
 
