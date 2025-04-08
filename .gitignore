@@ -1,0 +1,8 @@
+# Streamlit конфигурационные файлы
+.streamlit/
+
+# Виртуальное окружение Python
+venv/
+env/
+__pycache__/
+*.pyc
