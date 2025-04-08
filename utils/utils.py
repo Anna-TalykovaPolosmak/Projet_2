@@ -122,44 +122,44 @@ def format_movie_info(movie):
         st.error(f"Erreur dans format_movie_info: {e}")
         return "Information non disponible"
 
-@st.cache_data(ttl=600)  # Кеширование результатов поиска на 10 минут
+@st.cache_data(ttl=600)  # Mise en cache des résultats de recherche pendant 10 minutes
 def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5):
     """
-    Оптимизированная функция поиска фильмов по ключевому слову или имени актера.
+    Fonction optimisée de recherche de films par mot-clé ou nom d'acteur.
     
     Args:
-        query (str): Поисковый запрос
-        films_df (pd.DataFrame): DataFrame с фильмами
-        intervenants_df (pd.DataFrame): DataFrame с актерами и режиссерами
-        lien_df (pd.DataFrame): DataFrame связывающая фильмы и людей
-        n_recommendations (int): Количество результатов для возврата
+        query (str): Requête de recherche
+        films_df (pd.DataFrame): DataFrame avec les films
+        intervenants_df (pd.DataFrame): DataFrame avec les acteurs et réalisateurs
+        lien_df (pd.DataFrame): DataFrame reliant les films et les personnes
+        n_recommendations (int): Nombre de résultats à retourner
     
     Returns:
-        pd.DataFrame: Найденные фильмы
+        pd.DataFrame: Films trouvés
     """
     try:
-        # Предварительная проверка на пустой запрос
+        # Vérification préliminaire d'une requête vide
         if not query or query.strip() == "":
             return films_df.head(n_recommendations)
 
-        query = query.lower()  # Переводим запрос в нижний регистр один раз
+        query = query.lower()  # Conversion de la requête en minuscules une seule fois
         
-        # Быстрый поиск по актёрам - используем индексацию для скорости
+        # Recherche rapide par acteurs - utilise l'indexation pour la vitesse
         actor_matches = intervenants_df[intervenants_df['primaryName'].str.lower().str.contains(query, na=False)]
         
         if not actor_matches.empty:
-            # Берем только первого найденного актера
+            # Prenons seulement le premier acteur trouvé
             actor_nconst = actor_matches.iloc[0]['nconst']
             
-            # Получаем фильмы с участием актера
+            # Récupération des films avec cet acteur
             actor_movies = lien_df[lien_df['nconst'] == actor_nconst]
             matched_films = films_df[films_df['tconst'].isin(actor_movies['tconst'])]
             
             if not matched_films.empty:
                 return matched_films.head(n_recommendations)
         
-        # Оптимизированное создание маски для поиска
-        # Ищем сначала только в самых важных полях для ускорения
+        # Création optimisée du masque pour la recherche
+        # Recherche d'abord uniquement dans les champs les plus importants pour accélérer
         essential_mask = (
             films_df['title'].str.lower().str.contains(query, na=False) |
             films_df['genres'].str.lower().str.contains(query, na=False)
@@ -170,7 +170,7 @@ def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5
         if not essential_matches.empty:
             return essential_matches.head(n_recommendations)
         
-        # Расширенный поиск только если необходимо
+        # Recherche étendue seulement si nécessaire
         extended_mask = (
             films_df['overview'].str.lower().str.contains(query, na=False) |
             films_df['keywords'].str.lower().str.contains(query, na=False) |
@@ -183,12 +183,12 @@ def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5
         if not extended_matches.empty:
             return extended_matches.head(n_recommendations)
             
-        # TF-IDF используем только в крайнем случае, когда прямой поиск не дал результатов
+        # TF-IDF utilisé uniquement en dernier recours, lorsque la recherche directe n'a donné aucun résultat
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.metrics.pairwise import cosine_similarity
         
-        # Создаем поисковый текст только для подмножества важных полей
-        # и с меньшим умножением для overview
+        # Création du texte de recherche uniquement pour un sous-ensemble de champs importants
+        # et avec une multiplication moindre pour overview
         films_df['search_text'] = (
             films_df['title'].fillna('') + ' ' +
             films_df['overview'].fillna('') + ' ' +
@@ -196,11 +196,11 @@ def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5
             films_df['genres'].fillna('')
         )
         
-        # Меньшее число max_features для ускорения
+        # Nombre réduit de max_features pour accélérer
         tfidf = TfidfVectorizer(
             stop_words='english',
-            max_features=2000,  # Уменьшено с 5000
-            ngram_range=(1, 1)  # Используем только unigrams для скорости
+            max_features=2000,  # Réduit de 5000
+            ngram_range=(1, 1)  # Utilisation uniquement des unigrammes pour la vitesse
         )
         
         tfidf_matrix = tfidf.fit_transform(films_df['search_text'])
@@ -212,55 +212,25 @@ def search_movies(query, films_df, intervenants_df, lien_df, n_recommendations=5
         
     except Exception as e:
         st.error(f"Erreur dans search_movies: {str(e)}")
-        return films_df.head(n_recommendations)  # Возвращаем популярные фильмы в случае ошибки
-    
-from supabase import create_client, Client
+        return films_df.head(n_recommendations)  # Retour des films populaires en cas d'erreur
 
-url = "https://ztihcbkzolqvmmiylcnn.supabase.co"
-key= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0aWhjYmt6b2xxdm1taXlsY25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5Njk1NjAsImV4cCI6MjA1MDU0NTU2MH0.z0lQr5IBN6-wMCJROEYLfQOHvn0WVPzsPZut4IWO-Sw"
-supabase: Client = create_client(url, key)
-
-
+# Fonctions d'authentification simplifiées (sans Supabase)
 def check_authentication():
     """Vérifie si l'utilisateur est connecté."""
-    return "user" in st.session_state
+    # Toujours retourner False car l'authentification est désactivée
+    return False
 
 def handle_signup(email, password):
     """Gestion de l'inscription."""
-    if not email or not password:
-        st.error("Veuillez remplir tous les champs pour vous inscrire.")
-        return
-    try:
-        response = supabase.auth.sign_up({"email": email, "password": password})
-        if response.user:
-            user_data = {"id": response.user.id, "email": email}
-            try:
-                supabase.table("users").insert(user_data).execute()
-                st.success("Inscription réussie ! Vous pouvez maintenant vous connecter.")
-            except Exception as e:
-                st.error(f"Erreur lors de l'ajout à la base de données : {str(e)}")
-        else:
-            st.error("Erreur lors de l'inscription. Veuillez réessayer.")
-    except Exception as e:
-        st.error(f"Une erreur inattendue est survenue : {str(e)}")
+    st.warning("L'authentification est désactivée dans cette version de l'application.")
+    return
 
 def handle_login(email, password):
     """Gestion de la connexion."""
-    if not email or not password:
-        st.error("Veuillez remplir tous les champs pour vous connecter.")
-        return
-    try:
-        response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-        if response.user:
-            st.session_state["user"] = {"id": response.user.id, "email": response.user.email}
-            st.success(f"Bienvenue {response.user.email} !")
-        else:
-            st.error("Erreur lors de la connexion. Vérifiez vos identifiants.")
-    except Exception as e:
-        st.error(f"Une erreur inattendue est survenue : {str(e)}")
+    st.warning("L'authentification est désactivée dans cette version de l'application.")
+    return
 
 def handle_logout():
     """Déconnexion de l'utilisateur."""
-    if "user" in st.session_state:
-        del st.session_state["user"]
-    st.rerun()
+    st.warning("L'authentification est désactivée dans cette version de l'application.")
+    return

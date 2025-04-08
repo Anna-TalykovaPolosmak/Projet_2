@@ -36,24 +36,7 @@ if 'selected_film_tconst' not in st.session_state:
 # Barre latérale pour l'inscription utilisateur
 with st.sidebar:
     st.title("Utilisateur")
-    if check_authentication():
-        # Si l'utilisateur est connecté
-        st.write(f"Connecté : {st.session_state['user']['email']}")
-        if st.button("Se déconnecter"):
-            handle_logout()
-    else:
-        # Si l'utilisateur n'est pas connecté
-        st.write("Non connecté")
-        auth_mode = st.radio("Action :", ["Se connecter", "S'inscrire"])
-        email = st.text_input("Email", placeholder="email@example.com")
-        password = st.text_input("Mot de passe", type="password", placeholder="Mot de passe")
-
-        if auth_mode == "S'inscrire":
-            if st.button("S'inscrire"):
-                handle_signup(email, password)
-        elif auth_mode == "Se connecter":
-            if st.button("Se connecter"):
-                handle_login(email, password)
+    st.info("L'authentification est désactivée dans cette version de l'application.")
 
 try:
     tconst = st.session_state['selected_film_tconst']
@@ -175,6 +158,6 @@ except Exception as e:
     st.session_state['go_to_details'] = False
     st.switch_page("home_page.py")
 
-# Chatbot
+# Chatbot 
 chat = MovieChatbot()
 chat.display()
